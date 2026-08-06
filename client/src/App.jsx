@@ -7,7 +7,7 @@ import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
 import Dashboard from './pages/Dashboard/Dashboard';
 import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/ProtectedRoute';
+import Map from './pages/Map/Map';
 
 function App() {
   return (
@@ -18,15 +18,9 @@ function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/map" element={<Map />} />
     </Routes>
   );
 }

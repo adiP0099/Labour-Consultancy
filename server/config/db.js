@@ -1,18 +1,17 @@
-// Centralized MongoDB connection setup for the application.
-const mongoose = require('mongoose');
-const { env } = require('./env');
+import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000
-    });
+    const conn = await mongoose.connect(process.env.MONGO_URI);
 
-    console.log('MongoDB connected successfully');
+    console.log("✅ MongoDB Connected Successfully");
+    console.log("Database:", conn.connection.name);
+    console.log("Host:", conn.connection.host);
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
+    console.error("❌ MongoDB Connection Failed");
+    console.error(error.message);
     process.exit(1);
   }
 };
 
-module.exports = connectDB;
+export default connectDB;

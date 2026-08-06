@@ -1,47 +1,84 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
 const AuthContext = createContext(null);
+
+// Backend Base URL
+const API = "http://localhost:5000/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+  // ===========================
+  // Check Login on Page Refresh
+  // ===========================
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  const savedUser = localStorage.getItem("user");
 
-    axios.get('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => setUser(res.data.user))
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setLoading(false));
-  }, []);
+  if (token && savedUser) {
+    setUser(JSON.parse(savedUser));
+  }
 
+  setLoading(false);
+}, []);
+
+  // ===========================
+  // Login
+  // ===========================
   const login = async (email, password) => {
-    const response = await axios.post('/api/auth/login', { email, password });
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    return response.data;
-  };
+  const response = await axios.post(`${API}/auth/login`, {
+    email,
+    password,
+  });
 
+  localStorage.setItem("token", response.data.token);
+  localStorage.setItem("user", JSON.stringify(response.data.user));
+
+  setUser(response.data.user);
+
+  return response.data;
+};
+  // ===========================
+  // Register
+  // ===========================
   const signup = async (payload) => {
-    const response = await axios.post('/api/auth/signup', payload);
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
+    const response = await axios.post(
+      `${API}/auth/register`,
+      payload
+    );
+
     return response.data;
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
 
-  const value = useMemo(() => ({ user, loading, login, signup, logout }), [user, loading]);
+// ===========================
+// Logout
+// ===========================
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  setUser(null);
+};
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+// Context Value
+const value = useMemo(
+  () => ({
+    user,
+    loading,
+    login,
+    signup,
+    logout,
+  }),
+  [user, loading]
+);
+
+return (
+  <AuthContext.Provider value={value}>
+    {children}
+  </AuthContext.Provider>
+);
 };
 
 export const useAuth = () => useContext(AuthContext);
